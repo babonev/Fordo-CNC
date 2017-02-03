@@ -1,0 +1,8 @@
+G90 G00 X-2.0 Y-1.0
+G01 X0 Y0 F8.0           ; point A
+Y4.0                     ; point B
+G02 X2.0 Y6.0 R2.0       ; point C
+G01 X8.0                 ; point D
+G02 X9.0 Y2.268 R2.0     ; point E
+G01 X0 Y0                ; point A
+G00 X-2.0 Y-1.0
