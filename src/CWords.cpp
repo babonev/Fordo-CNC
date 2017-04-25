@@ -10,12 +10,13 @@
 /// @links      http://eng-serve.com/cnc/gcode_comment.html
 ///=============================================================================
 
-#include "..\inc\Std_Types.h"
-#include "..\inc\CWords.h"
-#include "..\inc\CPositioning.h"
-#include "..\inc\CMotion.h"
-#include "..\inc\CSettings.h"
-#include "..\inc\DebugUtilities.h"
+#include "../inc/Std_Types.h"
+#include "../inc/CWords.h"
+#include "../inc/IMotionBlock.h"
+#include "../inc/CLinearMotion.h"
+#include "../inc/CCircularMotion.h"
+#include "../inc/CSettings.h"
+#include "../inc/DebugUtilities.h"
 
 ///=============================================================================
 /// @brief Definition of static objects
@@ -42,7 +43,10 @@ CSpeed                          CWord::mSpeed;
 CFeedrate                       CWord::mFeedrate;
 CTool                           CWord::mTool;
 CComments                       CWord::mComment;
-
+CLinearMotion                   CWord::mLinearMotion;
+CCircularMotion                 CWord::mCircularMotion;
+IMotionBlock*                   CWord::mpMotion = &CWord::mLinearMotion;
+uint16                          CWord::mLineNumber = 0;
 /// @brief Workarround for gcc warning: _DSO_HANDLE isn't defined
 #ifdef STM32F103C8
     void* __dso_handle;
@@ -61,7 +65,7 @@ CWord::~CWord()
 /// @brief
 void CWord::handler()
 {
-    CDebug::reportError(ERROR_Invalid_Word);
+    CDebug::reportErrorLine(ERROR_Invalid_Word);
 }
 
 /// @brief
@@ -193,7 +197,7 @@ float CWord::processFloat( const uint8* seqBlock, uint8* const pIndex )
 
     /// read the whole value or the integer part depends on format
     prevIndex = *pIndex;
-    integer = processInteger(&seqBlock[*pIndex], pIndex);
+    integer = processInteger(seqBlock, pIndex);
 
     switch( CSettings::NUM_FORMAT() )
     {
@@ -250,7 +254,7 @@ void CWord::processComment( const uint8* seqBlock, uint8* const pIndex )
 /// @brief
 void CAddressN_BlockNumber::handler()
 {
-    CDebug::set_lineNumber(param);
+    mLineNumber = param;
 }
 
 ///=============================================================================
@@ -300,7 +304,7 @@ CAddressG_PreparatoryCommands* CAddressG_PreparatoryCommands::assign( const uint
 /// @brief Handling all others
 void CAddressG_PreparatoryCommands::handler()
 {
-    CDebug::reportError(ERROR_Invalid_GCode);
+    CDebug::reportErrorLine(ERROR_Invalid_GCode);
 }
 
 /// @brief Handling: G4, G9, G10, G11
@@ -309,7 +313,7 @@ void CAddressG_UnmodalCodes::handler()
     switch(code)
     {
     case 4:  /// G04 - Dwell
-        CPositioning::set_pause(100);
+        mpMotion->set_pause(100);
         break;
     case 9:  /// G09 -
     case 10: /// G10 - Coordinate System Data Tool and Work Offset Tables
@@ -322,11 +326,22 @@ void CAddressG_UnmodalCodes::handler()
 /// @brief Handling: G0, G1, G2, G3
 void CAddressG_MotionCommands::handler()
 {
-    /// G00 - Rapid positioning
-    /// G01 - Linear interpolation
-    /// G02 - Circular interpolation clockwise
-    /// G03 - Circular interpolation counterclockwise
-    CPositioning::set_motion(static_cast<CPositioning::EMoveType>(code));
+    switch(code)
+    {
+    case 0:  /// G00 - Rapid positioning
+    case 1:  /// G01 - Linear interpolation
+        mpMotion = &mLinearMotion;
+        break;
+    case 2:  /// G02 - Circular interpolation clockwise
+    case 3:  /// G03 - Circular interpolation counterclockwise
+        mpMotion = &mCircularMotion;
+        break;
+    default:
+    	CDebug::reportErrorLine(ERROR_Invalid_GCode);
+        break;
+    }
+
+    mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
 }
 
 /// @brief Handling: G17, G18, G19
@@ -375,16 +390,16 @@ CAddressM_AuxiliaryFunctions* CAddressM_AuxiliaryFunctions::assign( const uint8 
     return res;
 }
 
-/// @brief Handling all others
-void CAddressM_AuxiliaryFunctions::handler()
-{
-    CDebug::reportError(ERROR_Invalid_MCode);
-}
-
 /// @brief Handling: M0, M1, M2, M30
 void CAddressM_Program::handler()
 {
 
+}
+
+/// @brief Handling all others
+void CAddressM_AuxiliaryFunctions::handler()
+{
+    CDebug::reportErrorLine(ERROR_Invalid_MCode);
 }
 
 ///=============================================================================
@@ -394,7 +409,7 @@ void CAddressM_Program::handler()
 /// @brief Handling: X, Y, Z
 void CAxisMotionCommands::handler()
 {
-    CPositioning::set_deltaAxis(param, static_cast<CPositioning::EAxis>(address - 'X'));
+	mpMotion->set_axisPos( static_cast<IMotionBlock::EAxis>(address - 'X'), param );
 }
 
 ///=============================================================================
@@ -406,15 +421,15 @@ void CAxisRelated::handler()
 {
     if ( ('I' <= address) && (address <= 'K') )
     {
-        CPositioning::set_arcOffset(param, static_cast<CPositioning::EAxis>(address - 'I'));
+    	mpMotion->set_arcOffset( static_cast<IMotionBlock::EAxis>(address - 'I'), param );
     }
     else if ( 'R' == address )
     {
-        CPositioning::set_radius(param);
+    	mpMotion->set_radius(param);
     }
     else
     {
-        CDebug::reportError(ERROR_Invalid_Word);
+        CDebug::reportErrorLine(ERROR_Invalid_Word);
     }
 }
 
@@ -425,7 +440,7 @@ void CAxisRelated::handler()
 /// @brief Handling: S
 void CPause::handler()
 {
-    CPositioning::set_pause( param );
+	mpMotion->set_pause( param );
 }
 
 ///=============================================================================
@@ -435,19 +450,19 @@ void CPause::handler()
 /// @brief Handling: S
 void CSpeed::handler()
 {
-    CPositioning::set_speed( param );
+	mpMotion->set_speed( param );
 }
 
 /// @brief Handling: F
 void CFeedrate::handler()
 {
-    CPositioning::set_speed( param );
+	mpMotion->set_speed( param );
 }
 
 /// @brief Handling: T
 void CTool::handler()
 {
-    CPositioning::set_tool( param );
+	mpMotion->set_tool( param );
 }
 
 ///=============================================================================

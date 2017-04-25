@@ -21,6 +21,9 @@ class CSpeed;
 class CFeedrate;
 class CTool;
 class CComments;
+class IMotionBlock;
+class CLinearMotion;
+class CCircularMotion;
 
 ///=============================================================================
 /// @brief Factory producing objects of G code group types. Also stores the
@@ -38,6 +41,11 @@ public:
 
 protected:
     static CWord mWord;
+    static IMotionBlock* mpMotion;
+    static CLinearMotion mLinearMotion;
+    static CCircularMotion mCircularMotion;
+    /// Store the line number
+    static uint16 mLineNumber;
 
 private:
     /// Create objects statically to avoid heap usage
@@ -50,7 +58,6 @@ private:
     static CTool mTool;
     static CComments mComment;
 
-private:
     /// Auxiliary functions parsing the parameters of G codes
     static uint16 processInteger( const uint8* seqBlock, uint8* const pIndex );
     static float processFloat( const uint8* seqBlock, uint8* const pIndex );

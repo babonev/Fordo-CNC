@@ -12,10 +12,15 @@
 #ifndef INC_CSETTINGS_H_
 #define INC_CSETTINGS_H_
 
+#include "../inc/CConfig.h"
+
+///
+///@brief File dependent values. Usually set from header.
+///
 class CSettings
 {
 public:
-    ///
+    ///@brief
     typedef enum
     {
         modeAbsolute,
@@ -23,7 +28,7 @@ public:
         modeCount
     } EMode;
 
-    ///
+    ///@brief
     typedef enum
     {
         unitMetric,
@@ -31,7 +36,7 @@ public:
         unitCount
     } EUnit;
 
-    ///
+    ///@brief
     typedef enum
     {
         dfFullAddress,
@@ -39,73 +44,84 @@ public:
         dfLeadingZeroes,
         dfDecimalPoint,
         dfCount
-    } EFormat;
+    } EDcimalFormat;
 
-    ///
+    ///@brief
     typedef enum
     {
-        drvOneStep,         /// 1/1 - step
-        drvHalfStep,        /// 1/2 - step
-        drvQuaterStep,      /// 1/4 - step
-        drvEighthStep,      /// 1/8 - step
-        drvStepModeCount
-    } EStepMode;
+        cfCommandFormat_1,
+        cfCommandFormat_2,
+        cfCount
+    } ECommandFormat;
 
-    /// Functions setting configuration properties
-    static void set_mode(const EMode systemMode);
-    static void set_unit(const EUnit systemUnit);
-    static void set_format(const EFormat systemFormat);
+    ///@brief
+    ///@param
+    static void set_default();
+    ///@brief
+    ///@param
+    static void set_mode(const EMode mode);
+    ///@brief
+    ///@param
+    static void set_unit(const EUnit unit);
+    ///@brief
+    ///@param
+    static void set_decimFormat(const EDcimalFormat format);
+    ///@brief
+    ///@param
+    static void set_comandFormat(const ECommandFormat format);
+    ///@brief
+    ///@param
     static void set_retract_pos(const float pos);
 
+    ///@brief
+    ///@return
+    static inline float MIN_INCREMENT()
+    {
+        return (unitMetric == mUnit) ? MIN_INCEMENT_METRIC : MIN_INCEMENT_IMPERIAL;
+    }
+
+    ///@brief
+    ///@return
+    static inline EDcimalFormat NUM_FORMAT()
+    {
+        return mDecimFormat;
+    }
+
+    ///@brief
+    ///@return
+    static inline bool IS_MODE_ABSOLUTE()
+    {
+        return (modeAbsolute == mMode);
+    }
+
+    ///@brief
+    ///@return
+    static inline bool IS_UNIT_METRIC()
+    {
+        return (unitMetric == mUnit);
+    }
+
+    ///@brief
+    ///@return
+    static inline float STEPS_FACTOR()
+    {
+        return ((unitMetric == mUnit) ? (MM_TO_STEPS*CConfig::STEP_MODE) : (MILS_TO_STEPS*CConfig::STEP_MODE));
+    }
+
 private:
-    /// Constants
+    ///@brief The lowest value that can be used in the selected metric system
     static const float MIN_INCEMENT_METRIC;
     static const float MIN_INCEMENT_IMPERIAL;
     static const float MM_TO_STEPS;
     static const float MILS_TO_STEPS;
 
-    /// Current configuration
-    static EMode mode;
-    static EUnit unit;
-    static EFormat format;
-    static EStepMode stepMode;
+    ///@brief Configuration storing members
+    static EMode mMode;
+    static EUnit mUnit;
+    static EDcimalFormat mDecimFormat;
+    static ECommandFormat mCmdFormat;
     static float retractPosition;
 
-public:
-    /// @brief
-    /// @return
-    static inline float MIN_INCREMENT()
-    {
-        return (unitMetric == unit) ? MIN_INCEMENT_METRIC : MIN_INCEMENT_IMPERIAL;
-    }
-
-    /// @brief
-    /// @return
-    static inline EFormat NUM_FORMAT()
-    {
-        return format;
-    }
-
-    /// @brief
-    /// @return
-    static inline bool IS_MODE_ABSOLUTE()
-    {
-        return (modeAbsolute == mode);
-    }
-
-    /// @brief
-    /// @return
-    static inline bool IS_UNIT_METRIC()
-    {
-        return (unitMetric == unit);
-    }
-
-    /// @brief
-    /// @return
-    static inline float STEPS_FACTOR()
-    {
-        return ((unitMetric == unit) ? (MM_TO_STEPS*stepMode) : (MILS_TO_STEPS*stepMode));
-    }
 };
 
 #endif  /// INC_CSETTINGS_H_

@@ -9,63 +9,70 @@
 /// @copyright
 ///=============================================================================
 
-#include "..\inc\Std_Types.h"
-#include "..\inc\CSettings.h"
+#include "../inc/Std_Types.h"
+#include "../inc/CSettings.h"
 
-///============================================================================
-/// @brief
-///============================================================================
-
-/// @brief The lowest value that can be used in the selected metric system
+///=============================================================================
+/// @brief INITIALIZATION
+///=============================================================================
 const float CSettings::MIN_INCEMENT_METRIC = 0.001;
 const float CSettings::MIN_INCEMENT_IMPERIAL = 0.0001;
 const float CSettings::MM_TO_STEPS = 4.2;
 const float CSettings::MILS_TO_STEPS = (0.0254 * 4.2);
 
-/// @brief Declaration configuration storing members
-CSettings::EMode CSettings::mode = modeAbsolute;
-CSettings::EUnit CSettings::unit = unitMetric;
-CSettings::EFormat CSettings::format = dfDecimalPoint;
-CSettings::EStepMode CSettings::stepMode = drvQuaterStep;
+CSettings::EMode CSettings::mMode = modeAbsolute;
+CSettings::EUnit CSettings::mUnit = unitMetric;
+CSettings::EDcimalFormat CSettings::mDecimFormat = dfDecimalPoint;
+CSettings::ECommandFormat CSettings::mCmdFormat = cfCommandFormat_2;
 float CSettings::retractPosition = (1.2 + 0.254);
 
-///============================================================================
-/// @brief
-///============================================================================
+///=============================================================================
+/// @brief PUBLIC METHODS
+///=============================================================================
 
-/// @brief
-/// @param
-void CSettings::set_mode(const EMode systemMode)
+void CSettings::set_default()
 {
-    if ( systemMode < modeCount )
+    mMode = modeAbsolute;
+    mUnit = unitMetric;
+    mDecimFormat = dfLeadingZeroes;
+    mCmdFormat = cfCommandFormat_2;
+    retractPosition = (1.2 + 0.254);
+}
+
+void CSettings::set_mode(const EMode mode)
+{
+    if ( mode < modeCount )
     {
-        mode = systemMode;
+        mMode = mode;
     }
 }
 
-/// @brief
-/// @param
-void CSettings::set_unit(const EUnit systemUnit)
+void CSettings::set_unit(const EUnit unit)
 {
-    if ( systemUnit < unitCount )
+    if ( unit < unitCount )
     {
-        unit = systemUnit;
+        mUnit = unit;
     }
 }
 
-/// @brief
-/// @param
-void CSettings::set_format(const EFormat systemFormat)
+void CSettings::set_decimFormat(const EDcimalFormat format)
 {
-    if ( systemFormat < dfCount )
+    if ( format < dfCount )
     {
-        format = systemFormat;
+        mDecimFormat = format;
     }
 }
 
-/// @brief
-/// @param
+void CSettings::set_comandFormat(const ECommandFormat format)
+{
+    if ( format < cfCount )
+    {
+        mCmdFormat = format;
+    }
+}
+
 void CSettings::set_retract_pos(const float pos)
 {
     retractPosition = pos;
 }
+
