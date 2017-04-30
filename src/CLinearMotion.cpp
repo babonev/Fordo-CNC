@@ -9,12 +9,12 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/IMotionBlock.h"
-#include "../inc/CLinearMotion.h"
-#include "../inc/CAxis.h"
-#include "../inc/CMathLib.h"
-#include "../inc/DebugUtilities.h"
+#include "Std_Types.h"
+#include "IMotionBlock.h"
+#include "CLinearMotion.h"
+#include "CAxis.h"
+#include "CMathLib.h"
+#include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -50,11 +50,6 @@ void CLinearMotion::set_motion( const EMotionMode motionMode )
     {
         mMotionMode = motionMode;
     }
-}
-
-void CLinearMotion::set_axisPos( const EAxis axis, const float value )
-{
-    mAxis[axis].position(value);
 }
 
 ///=============================================================================

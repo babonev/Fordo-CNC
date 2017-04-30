@@ -9,10 +9,10 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/IMotionBlock.h"
-#include "../inc/CSettings.h"
-#include "../inc/DebugUtilities.h"
+#include "Std_Types.h"
+#include "IMotionBlock.h"
+#include "CSettings.h"
+#include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief
@@ -46,16 +46,25 @@ IMotionBlock::~IMotionBlock()
 
 void IMotionBlock::set_axisPos( const EAxis axis, const float value )
 {
-    CDebug::reportErrorLine(ERROR_Invalid_Motion);
+    mAxis[axis].position(value);
+    CDebug::traceEvent(EVENT_AxisSet, value);
 }
 
 void IMotionBlock::set_radius( const float radius)
 {
+    /// Error handler. Should not enter here.
+    CDebug::reportErrorLine(ERROR_Invalid_Motion);
+}
+
+void IMotionBlock::set_arcRadius( const float radius)
+{
+    /// Error handler. Should not enter here.
     CDebug::reportErrorLine(ERROR_Invalid_Motion);
 }
 
 void IMotionBlock::set_arcOffset( const EAxis axis, const float value )
 {
+    /// Error handler. Should not enter here.
     CDebug::reportErrorLine(ERROR_Invalid_Motion);
 }
 

@@ -9,8 +9,8 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/CSettings.h"
+#include "Std_Types.h"
+#include "CSettings.h"
 
 ///=============================================================================
 /// @brief INITIALIZATION

@@ -16,7 +16,7 @@
 #include "../inc/DebugUtilities.h"
 
 ///=============================================================================
-/// @brief
+/// @brief INITIALIZATION
 ///=============================================================================
 
 
@@ -38,8 +38,6 @@ void CAxis::position( const float offset )
     }
 
     mDeltaSteps = distanceInSteps(mDeltaPosition);
-
-    CDebug::reportError(mPosition >= 0, ERROR_Position_OutOfBounds);
     /// TODO: Check if less than max possible
 }
 

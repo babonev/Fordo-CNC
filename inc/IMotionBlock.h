@@ -12,11 +12,11 @@
 #ifndef INC_IMOTIONBLOCK_H_
 #define INC_IMOTIONBLOCK_H_
 
-#include "../inc/CAxis.h"
+#include "CAxis.h"
 
 ///
 ///@brief
-//
+///
 class IMotionBlock
 {
 public:
@@ -64,6 +64,9 @@ public:
     /// @brief
     /// @param
     virtual void set_radius( const float radius);
+    /// @brief
+    /// @param
+    virtual void set_arcRadius( const float radius);
     /// @brief
     /// @param
     /// @param

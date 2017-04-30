@@ -16,7 +16,7 @@ class IMotionBlock;
 
 ///
 ///@brief
-//
+///
 class CLinearMotion : public IMotionBlock
 {
 public:
@@ -27,11 +27,6 @@ public:
     ///@brief
 	///@param
     virtual void set_motion( const EMotionMode motionMode);
-
-    ///@brief
-    ///@param
-    ///@param
-    virtual void set_axisPos( const EAxis axis, const float value );
 
 private:
 

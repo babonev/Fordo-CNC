@@ -95,7 +95,7 @@ void CExellonHeader::process( const uint8* hdrBlock, const uint32 length )
         else
         {
             mHeaderFinished = true;
-            CDebug::traceEvent(EVENT_NoHeader, 0);
+            CDebug::traceEvent(EVENT_NoHeader, (uint32)0);
         }
 	}
 	else
@@ -126,7 +126,7 @@ void CExellonHeader::process( const uint8* hdrBlock, const uint32 length )
 uint8 CExellonHeader::getMatch( const uint8* hdrBlock, uint8* const byteIndex )
 {
     uint8 res = 0xff;
-    uint8 cmdIndex = 0;
+    uint8 cmdIndex;
     uint8 readIndex = 0;
     CExellonHeader const*  cmd;
 

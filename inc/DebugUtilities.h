@@ -18,6 +18,8 @@ typedef enum
     EVENT_MotorInitialized,
     EVENT_NoHeader,
     EVENT_UnitChanged,
+    EVENT_AxisSet,
+    EVENT_RadiusSet,
     EVENT_LineCreated,
     EVENT_CircleCreated,
     EVENT_ToolChanged,
@@ -60,6 +62,7 @@ public:
     static void logEvent( const EEvent event, const uint8 param );
     /// @brief
     /// @param
+    static void traceEvent( const EEvent event, const float param );
     static void traceEvent( const EEvent event, const uint32 param );
     /// @brief
     /// @param
@@ -68,7 +71,7 @@ public:
     /// @brief
     /// @param
     /// @param
-    static void reportError( const EError error, const uint32 param );
+    static void reportError( const EError error, const float param );
     /// @brief
     /// @param
     /// @param
@@ -105,7 +108,7 @@ private:
     /// @param
     /// @param
     /// @remark The user is responsible to supply long enough buffer
-    static uint8 makeString( uint32 indata, uint8* outdata, const uint8 len );
+    static uint8 makeString( float indata, uint8* outdata, const uint8 len, const bool isInt );
     /// @brief
     /// @param
     /// @param

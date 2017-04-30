@@ -44,9 +44,9 @@ public:
 
 private:
     ///@brief New offset of axis in measurement units
-    float mDeltaPosition;    /// [units]
+    float mDeltaPosition;    /// [units: mil/mm]
     ///@brief Current position of axis in measurement units
-    float mPosition;         /// [units]
+    float mPosition;         /// [units: mil/mm]
     ///@brief Current position of axis in step
     uint32 mDeltaSteps;      /// [steps]
     ///@brief Current position of axis in step

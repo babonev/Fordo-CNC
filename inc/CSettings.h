@@ -12,7 +12,7 @@
 #ifndef INC_CSETTINGS_H_
 #define INC_CSETTINGS_H_
 
-#include "../inc/CConfig.h"
+#include "CConfig.h"
 
 ///
 ///@brief File dependent values. Usually set from header.
@@ -75,38 +75,25 @@ public:
 
     ///@brief
     ///@return
-    static inline float MIN_INCREMENT()
-    {
-        return (unitMetric == mUnit) ? MIN_INCEMENT_METRIC : MIN_INCEMENT_IMPERIAL;
-    }
-
+    static inline float MIN_INCREMENT();
     ///@brief
     ///@return
-    static inline EDcimalFormat NUM_FORMAT()
-    {
-        return mDecimFormat;
-    }
-
+    static inline uint32 LZ_COUNT();
     ///@brief
     ///@return
-    static inline bool IS_MODE_ABSOLUTE()
-    {
-        return (modeAbsolute == mMode);
-    }
-
+    static inline uint32 TZ_COUNT();
     ///@brief
     ///@return
-    static inline bool IS_UNIT_METRIC()
-    {
-        return (unitMetric == mUnit);
-    }
-
+    static inline EDcimalFormat NUM_FORMAT();
     ///@brief
     ///@return
-    static inline float STEPS_FACTOR()
-    {
-        return ((unitMetric == mUnit) ? (MM_TO_STEPS*CConfig::STEP_MODE) : (MILS_TO_STEPS*CConfig::STEP_MODE));
-    }
+    static inline bool IS_MODE_ABSOLUTE();
+    ///@brief
+    ///@return
+    static inline bool IS_UNIT_METRIC();
+    ///@brief
+    ///@return
+    static inline float STEPS_FACTOR();
 
 private:
     ///@brief The lowest value that can be used in the selected metric system
@@ -123,5 +110,41 @@ private:
     static float retractPosition;
 
 };
+
+
+inline float CSettings::MIN_INCREMENT()
+{
+    return (unitMetric == mUnit) ? MIN_INCEMENT_METRIC : MIN_INCEMENT_IMPERIAL;
+}
+
+inline uint32 CSettings::LZ_COUNT()
+{
+    return (unitMetric == mUnit) ? CConfig::METRIC_LZ : CConfig::INCH_LZ;
+}
+
+inline uint32 CSettings::TZ_COUNT()
+{
+    return (unitMetric == mUnit) ? CConfig::METRIC_TZ : CConfig::INCH_TZ;
+}
+
+inline CSettings::EDcimalFormat CSettings::NUM_FORMAT()
+{
+    return mDecimFormat;
+}
+
+inline bool CSettings::IS_MODE_ABSOLUTE()
+{
+    return (modeAbsolute == mMode);
+}
+
+inline bool CSettings::IS_UNIT_METRIC()
+{
+    return (unitMetric == mUnit);
+}
+
+inline float CSettings::STEPS_FACTOR()
+{
+    return ((unitMetric == mUnit) ? (MM_TO_STEPS*CConfig::STEP_MODE) : (MILS_TO_STEPS*CConfig::STEP_MODE));
+}
 
 #endif  /// INC_CSETTINGS_H_

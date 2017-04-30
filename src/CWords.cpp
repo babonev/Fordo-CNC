@@ -10,13 +10,14 @@
 /// @links      http://eng-serve.com/cnc/gcode_comment.html
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/CWords.h"
-#include "../inc/IMotionBlock.h"
-#include "../inc/CLinearMotion.h"
-#include "../inc/CCircularMotion.h"
-#include "../inc/CSettings.h"
-#include "../inc/DebugUtilities.h"
+#include "Std_Types.h"
+#include "CWords.h"
+#include "IMotionBlock.h"
+#include "CLinearMotion.h"
+#include "CCircularMotion.h"
+#include "CSpindle.h"
+#include "CSettings.h"
+#include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief Definition of static objects
@@ -35,6 +36,7 @@ CAddressG_Cycles                CAddressG_PreparatoryCommands::mG_Cycles;
 
 CAddressM_AuxiliaryFunctions    CAddressM_AuxiliaryFunctions::mM_AuxiliaryFunctions;
 CAddressM_Program               CAddressM_AuxiliaryFunctions::mM_Program;
+CAddressM_ZAxis                 CAddressM_AuxiliaryFunctions::mM_ZAxis;
 
 CAxisMotionCommands             CWord::mAxisMotionCommands;
 CAxisRelated                    CWord::mAxisRelated;
@@ -43,9 +45,12 @@ CSpeed                          CWord::mSpeed;
 CFeedrate                       CWord::mFeedrate;
 CTool                           CWord::mTool;
 CComments                       CWord::mComment;
+
+IMotionBlock*                   CWord::mpMotion = &CWord::mLinearMotion;
 CLinearMotion                   CWord::mLinearMotion;
 CCircularMotion                 CWord::mCircularMotion;
-IMotionBlock*                   CWord::mpMotion = &CWord::mLinearMotion;
+CSpindle                        CWord::mSpindle;
+
 uint16                          CWord::mLineNumber = 0;
 /// @brief Workarround for gcc warning: _DSO_HANDLE isn't defined
 #ifdef STM32F103C8
@@ -97,7 +102,7 @@ void CWord::assign( const uint8 address, const uint8* seqBlock, uint8* const pIn
         mAxisMotionCommands.address = address;
         mAxisMotionCommands.param = processFloat(seqBlock, pIndex);
     }
-    else  if ( (('I' <= address) && (address <= 'K')) || ('Q' == address) || ('R' == address) )
+    else  if ( ('A' == address) || (('I' <= address) && (address <= 'K')) || ('Q' == address) || ('R' == address) )
     {
         obj = &mAxisRelated;
         mAxisRelated.address = address;
@@ -180,13 +185,13 @@ float CWord::processFloat( const uint8* seqBlock, uint8* const pIndex )
 {
     /// Power of 10
     static const float Pow10[] = { 1.0, 10.0, 100.0, 1000.0, 10000.0 };
-    /// Maximum number of digits that represents a parameter
-    static const uint8 FULL_ADDRESS_LENGTH = 8;
 
     uint8 prevIndex;
     sint8 sign = 1;
     uint32 integer = 0;
     float result;
+
+    CSettings::EDcimalFormat numFormat = CSettings::NUM_FORMAT();
 
     /// read sign of value
     while( '-' == seqBlock[*pIndex] )
@@ -199,16 +204,22 @@ float CWord::processFloat( const uint8* seqBlock, uint8* const pIndex )
     prevIndex = *pIndex;
     integer = processInteger(seqBlock, pIndex);
 
-    switch( CSettings::NUM_FORMAT() )
+    /// check if decimal point value
+    if ( '.' == seqBlock[*pIndex] )
+    {
+        numFormat = CSettings::dfDecimalPoint;
+    }
+
+    switch( numFormat )
     {
     case CSettings::dfFullAddress:
         result = static_cast<float>(integer * CSettings::MIN_INCREMENT());
         break;
     case CSettings::dfTrailingZeros:
-        result = static_cast<float>(integer * CSettings::MIN_INCREMENT());
+        result = static_cast<float>(integer / Pow10[CSettings::TZ_COUNT()]);
         break;
     case CSettings::dfLeadingZeroes:
-        result = static_cast<float>(integer * Pow10[FULL_ADDRESS_LENGTH - (*pIndex - prevIndex)] * CSettings::MIN_INCREMENT());
+        result = static_cast<float>(integer * Pow10[CSettings::LZ_COUNT() - (*pIndex - prevIndex)]);
         break;
     case CSettings::dfDecimalPoint:
         result = static_cast<float>(integer);
@@ -271,7 +282,7 @@ CAddressG_PreparatoryCommands* CAddressG_PreparatoryCommands::assign( const uint
     {
         res = &mG_UnmodalCodes;
     }
-    else if ( (0 <= code) && (code <= 3) )
+    else if ( ((0 <= code) && (code <= 3)) || (32 == code) || (33 == code) )
     {
         res = &mG_MotionCommands;
     }
@@ -304,7 +315,7 @@ CAddressG_PreparatoryCommands* CAddressG_PreparatoryCommands::assign( const uint
 /// @brief Handling all others
 void CAddressG_PreparatoryCommands::handler()
 {
-    CDebug::reportErrorLine(ERROR_Invalid_GCode);
+    CDebug::reportError(ERROR_Invalid_GCode, (uint32)code);
 }
 
 /// @brief Handling: G4, G9, G10, G11
@@ -323,7 +334,7 @@ void CAddressG_UnmodalCodes::handler()
     }
 }
 
-/// @brief Handling: G0, G1, G2, G3
+/// @brief Handling: G0, G1, G2, G3, G32, G33
 void CAddressG_MotionCommands::handler()
 {
     switch(code)
@@ -331,17 +342,23 @@ void CAddressG_MotionCommands::handler()
     case 0:  /// G00 - Rapid positioning
     case 1:  /// G01 - Linear interpolation
         mpMotion = &mLinearMotion;
+        mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
         break;
     case 2:  /// G02 - Circular interpolation clockwise
     case 3:  /// G03 - Circular interpolation counterclockwise
+        mpMotion = &mCircularMotion;
+        mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
+        break;
+    case 32: /// G32 - Routed Circle Canned Cycle Clockwise
+        mpMotion = &mCircularMotion;
+        break;
+    case 33: /// G33 - Routed Circle Canned Cycle Counterclockwise
         mpMotion = &mCircularMotion;
         break;
     default:
     	CDebug::reportErrorLine(ERROR_Invalid_GCode);
         break;
     }
-
-    mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
 }
 
 /// @brief Handling: G17, G18, G19
@@ -380,6 +397,10 @@ CAddressM_AuxiliaryFunctions* CAddressM_AuxiliaryFunctions::assign( const uint8 
 	{
         res = &mM_Program;
     }
+    else if ( (15 <= code) && (code <= 16) )
+    {
+        res = &mM_ZAxis;
+    }
     else
     {
         res = &mM_AuxiliaryFunctions;
@@ -396,10 +417,27 @@ void CAddressM_Program::handler()
 
 }
 
+/// @brief Handling: M15, M16
+void CAddressM_ZAxis::handler()
+{
+    CAxis::EAxisDir dir;
+
+    if ( 15 == code )
+    {
+        dir = CAxis::mdForward;
+    }
+    else
+    {
+        dir = CAxis::mdBackward;
+    }
+
+    mSpindle.doMove(dir);
+}
+
 /// @brief Handling all others
 void CAddressM_AuxiliaryFunctions::handler()
 {
-    CDebug::reportErrorLine(ERROR_Invalid_MCode);
+    CDebug::reportError(ERROR_Invalid_MCode, (uint32)code);
 }
 
 ///=============================================================================
@@ -416,10 +454,14 @@ void CAxisMotionCommands::handler()
 /// @brief Axis Related
 ///=============================================================================
 
-/// @brief Handling: I, J, K, R, Q
+/// @brief Handling: A, I, J, K, R, Q
 void CAxisRelated::handler()
 {
-    if ( ('I' <= address) && (address <= 'K') )
+    if ( 'A' == address )
+    {
+        mpMotion->set_arcRadius(param);
+    }
+    else if ( ('I' <= address) && (address <= 'K') )
     {
     	mpMotion->set_arcOffset( static_cast<IMotionBlock::EAxis>(address - 'I'), param );
     }

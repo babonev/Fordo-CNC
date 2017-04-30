@@ -24,6 +24,7 @@ class CComments;
 class IMotionBlock;
 class CLinearMotion;
 class CCircularMotion;
+class CSpindle;
 
 ///=============================================================================
 /// @brief Factory producing objects of G code group types. Also stores the
@@ -44,6 +45,7 @@ protected:
     static IMotionBlock* mpMotion;
     static CLinearMotion mLinearMotion;
     static CCircularMotion mCircularMotion;
+    static CSpindle mSpindle;
     /// Store the line number
     static uint16 mLineNumber;
 
@@ -61,6 +63,7 @@ private:
     /// Auxiliary functions parsing the parameters of G codes
     static uint16 processInteger( const uint8* seqBlock, uint8* const pIndex );
     static float processFloat( const uint8* seqBlock, uint8* const pIndex );
+    static uint8 countZeroes( const uint8* seqBlock, uint8* const pIndex );
     static void processComment( const uint8* seqBlock, uint8* const pIndex );
 };
 
@@ -155,6 +158,7 @@ public:
 
 /// @brief Forward declaration of classes used in CAddressM_AuxiliaryFunctions
 class CAddressM_Program;
+class CAddressM_ZAxis;
 
 /// @brief M - Base class
 class CAddressM_AuxiliaryFunctions : public CWord
@@ -170,10 +174,18 @@ protected:
 private:
     /// Create objects statically to avoid heap usage
     static CAddressM_Program mM_Program;
+    static CAddressM_ZAxis mM_ZAxis;
 };
 
 /// @brief 00. Program
 class CAddressM_Program: public CAddressM_AuxiliaryFunctions
+{
+public:
+    void handler();
+};
+
+/// @brief
+class CAddressM_ZAxis: public CAddressM_AuxiliaryFunctions
 {
 public:
     void handler();

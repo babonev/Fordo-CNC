@@ -9,9 +9,10 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/IMotionBlock.h"
-#include "../inc/CCircularMotion.h"
+#include "Std_Types.h"
+#include "IMotionBlock.h"
+#include "CCircularMotion.h"
+#include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -36,14 +37,21 @@ void CCircularMotion::set_motion( const EMotionMode motionMode )
     }
 }
 
-void CCircularMotion::set_arcOffset( const EAxis axis, const float steps )
-{
-
-}
-
 void CCircularMotion::set_radius( const float radius )
 {
     mRadius = radius;
+    CDebug::traceEvent(EVENT_RadiusSet, radius);
+}
+
+void CCircularMotion::set_arcRadius( const float radius )
+{
+    mRadius = radius;
+    CDebug::traceEvent(EVENT_RadiusSet, radius);
+}
+
+void CCircularMotion::set_arcOffset( const EAxis axis, const float steps )
+{
+
 }
 
 ///=============================================================================

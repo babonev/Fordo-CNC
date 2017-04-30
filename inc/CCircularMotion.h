@@ -33,6 +33,9 @@ public:
     void set_radius( const float radius);
     ///@brief
     ///@param
+    void set_arcRadius( const float radius );
+    ///@brief
+    ///@param
     ///@param
     void set_arcOffset( const EAxis axis, const float steps );
 

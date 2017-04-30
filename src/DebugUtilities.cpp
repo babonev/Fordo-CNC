@@ -12,6 +12,7 @@
 #include "..\inc\Std_Types.h"
 #include "..\inc\DebugUtilities.h"
 #include <stdio.h>
+#include <string.h>
 
 ///=============================================================================
 /// @brief
@@ -43,11 +44,21 @@ void CDebug::logEvent( const EEvent event, const uint8 param )
     }
 }
 
+void CDebug::traceEvent( const EEvent event, const float param )
+{
+    uint8 strParam[11];
+
+    makeString(param, strParam, sizeof(strParam), false);
+
+    /// output it over some interface
+    outputEvent(event, strParam);
+}
+
 void CDebug::traceEvent( const EEvent event, const uint32 param )
 {
     uint8 strParam[11];
 
-    (void)CDebug::makeString(param, strParam, sizeof(strParam));
+    makeString(param, strParam, sizeof(strParam), true);
 
     /// output it over some interface
     outputEvent(event, strParam);
@@ -62,11 +73,11 @@ void CDebug::reportError( const boolean condition, const EError error )
     }
 }
 
-void CDebug::reportError( const EError error, const uint32 param )
+void CDebug::reportError( const EError error, const float param )
 {
     uint8 strParam[11];
 
-    (void)CDebug::makeString(param, strParam, sizeof(strParam));
+    makeString(param, strParam, sizeof(strParam), true);
 
     /// output it over some interface
     outputError(error, strParam);
@@ -83,10 +94,19 @@ void CDebug::reportErrorLine( const EError error )
 	reportError(error, seqNumber);
 }
 
-uint8 CDebug::makeString( uint32 indata, uint8* outdata, const uint8 len )
+uint8 CDebug::makeString( float indata, uint8* outdata, const uint8 len, const bool isInt )
 {
     uint8 bufLen = 0;
-
+#ifdef _WIN32
+    if ( isInt )
+    {
+        bufLen = sprintf((char*)outdata, "%d", (int)indata);
+    }
+    else
+    {
+        bufLen = sprintf((char*)outdata, "%f", indata);
+    }
+#else
     // Convert the number into string but reversed
     do
     {
@@ -117,6 +137,7 @@ uint8 CDebug::makeString( uint32 indata, uint8* outdata, const uint8 len )
     }
 
     outdata[bufLen] = '\0';
+#endif
 
     return bufLen;
 }
@@ -149,7 +170,7 @@ void CDebug::outputError( const EError error, const uint8* const message )
         break;
     }
 
-    printf("ERROR %s: %s\n", errString, message);
+    printf("ERROR: %s - %s\n", errString, message);
 }
 
 void CDebug::outputEvent( const EEvent event, const uint8* const message )
@@ -158,14 +179,20 @@ void CDebug::outputEvent( const EEvent event, const uint8* const message )
 
     switch(event)
     {
+    case EVENT_AxisSet:
+        strcpy(eventString, "Axis set");
+        break;
+    case EVENT_RadiusSet:
+        strcpy(eventString, "Radius set");
+        break;
     case EVENT_ToolChanged:
-        sprintf(eventString, "Tool changed");
+        strcpy(eventString, "Tool changed");
         break;
     default:
-        sprintf(eventString, "%d", (int)event);
+        sprintf(eventString, "EVENT %d", (int)event);
         break;
     }
 
-    printf("<%s> %s\n", eventString, message);
+    printf("<%s: %s >\n", eventString, message);
 }
 

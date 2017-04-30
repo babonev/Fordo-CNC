@@ -9,12 +9,15 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/CSettings.h"
+#include "Std_Types.h"
+#include "CSettings.h"
 
 ///=============================================================================
 /// @brief INITIALIZATION
 ///=============================================================================
+const char* const CConfig::METRIC_FORMAT = "000.000";
+const char* const CConfig::INCH_FORMAT = "00.0000";
+
 const uint8 CConfig::FEEDRATE_ACCEL_PROFILE[5] = { 24, 40, 56, 72, 100 };
 const uint8 CConfig::FEEDRATE_DECEL_PROFILE[5] = { 100, 84, 68, 52, 24 };
 const uint8 CConfig::SPEED_ACCEL_PROFILE[5] = { 20, 30, 40, 50, 100 };
