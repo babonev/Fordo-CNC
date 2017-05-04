@@ -12,19 +12,20 @@
 #ifndef INC_CAXIS_H_
 #define INC_CAXIS_H_
 
+/// @brief
+typedef enum
+{
+    mdForward = 1,
+    mdNoMove = 0,
+    mdBackward = -1
+} EAxisDir;
+
 ///
 ///@brief
 //
 class CAxis
 {
 public:
-    /// @brief
-    typedef enum
-    {
-        mdForward = 1,
-        mdNoMove = 0,
-        mdBackward = -1
-    } EAxisDir;
 
     ///@brief
     ///@param

@@ -24,7 +24,6 @@ class CComments;
 class IMotionBlock;
 class CLinearMotion;
 class CCircularMotion;
-class CSpindle;
 
 ///=============================================================================
 /// @brief Factory producing objects of G code group types. Also stores the
@@ -45,7 +44,6 @@ protected:
     static IMotionBlock* mpMotion;
     static CLinearMotion mLinearMotion;
     static CCircularMotion mCircularMotion;
-    static CSpindle mSpindle;
     /// Store the line number
     static uint16 mLineNumber;
 

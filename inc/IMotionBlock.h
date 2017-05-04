@@ -14,21 +14,21 @@
 
 #include "CAxis.h"
 
+///@brief Names and number of axis
+typedef enum
+{
+    aAxisX,
+    aAxisY,
+    aAxisZ,
+    aAxisCount
+} EAxis;
+
 ///
 ///@brief
 ///
 class IMotionBlock
 {
 public:
-	///@brief Names and number of axis
-    typedef enum
-    {
-        aAxisX,
-        aAxisY,
-        aAxisZ,
-        aAxisCount
-    } EAxis;
-
     ///@brief
     typedef enum
     {
@@ -98,8 +98,6 @@ protected:
     static uint32 mAxisDeltaSteps;
     ///@brief
     static uint32 mAxisHalfDeltaSteps;
-    ///@brief
-    static uint32 mActualFeedrate;
     ///@brief Sub-type of motion
     EMotionMode mMotionMode;
 
@@ -111,7 +109,7 @@ protected:
     /// @brief
     /// @param
     /// @param
-    static void doStep( const EAxis axis, const CAxis::EAxisDir dir );
+    static void doStep( const EAxis axis, const EAxisDir dir );
 
 private:
     ///@brief

@@ -11,6 +11,7 @@
 
 #include "Std_Types.h"
 #include "IMotionBlock.h"
+#include "CDriverAdapter.h"
 #include "CSettings.h"
 #include "DebugUtilities.h"
 
@@ -22,8 +23,7 @@ uint32 IMotionBlock::mPauseCount = 0;
 uint32 IMotionBlock::mFeedrate = 0;
 uint32 IMotionBlock::mSpeed = 0;
 uint32 IMotionBlock::mTool = 0;
-IMotionBlock::EAxis IMotionBlock::mLeadingAxis = aAxisCount;
-uint32 IMotionBlock::mActualFeedrate = 0;
+EAxis IMotionBlock::mLeadingAxis = aAxisCount;
 uint32 IMotionBlock::mAxisDeltaSteps = 0;
 uint32 IMotionBlock::mAxisHalfDeltaSteps = 0;
 
@@ -36,7 +36,6 @@ void IMotionBlock::init( void )
     mLeadingAxis = aAxisCount;
     mAxisDeltaSteps = 0;
     mAxisHalfDeltaSteps = 0;
-    mActualFeedrate = 0;
 }
 
 IMotionBlock::~IMotionBlock()
@@ -106,18 +105,20 @@ sint32 IMotionBlock::convertToSteps( const float dist )
     return (dist * CSettings::STEPS_FACTOR());
 }
 
-void IMotionBlock::doStep( const EAxis axis, const CAxis::EAxisDir dir )
+void IMotionBlock::doStep( const EAxis axis, const EAxisDir dir )
 {
+    uint32 actualFeedrate;
+
     if ( mLeadingAxis == axis )
     {
         /// Determine if acceleration or deceleration profile is needed
         if ( mAxisDeltaSteps > mAxisHalfDeltaSteps )
         {
-            mActualFeedrate = (mFeedrate * CConfig::get_FeedrateAccelFactor(mAxisDeltaSteps)) / 100;
+            actualFeedrate = (mFeedrate * CConfig::get_FeedrateAccelFactor(mAxisDeltaSteps)) / 100;
         }
         else
         {
-            mActualFeedrate = (mFeedrate * CConfig::get_FeedrateDecelFactor(mAxisDeltaSteps)) / 100;
+            actualFeedrate = (mFeedrate * CConfig::get_FeedrateDecelFactor(mAxisDeltaSteps)) / 100;
         }
 
         if ( mAxisDeltaSteps > 0 )
@@ -127,13 +128,22 @@ void IMotionBlock::doStep( const EAxis axis, const CAxis::EAxisDir dir )
     }
     else
     {
-       if ( 0 == mActualFeedrate )
-       {
-           mActualFeedrate = mFeedrate >> 4;
-       }
+       actualFeedrate = mFeedrate >> 4;
     }
 
-    // TODO: Do the step with the calculated feed rate
+    // Do the step with the calculated feed rate
+    switch(axis)
+    {
+    case aAxisX:
+
+        break;
+    case aAxisY:
+        CDriverAdapter::doMoveY(dir, actualFeedrate);
+        break;
+    default:
+        // Do nothing
+        break;
+    }
 }
 
 

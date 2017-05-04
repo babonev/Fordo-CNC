@@ -78,8 +78,8 @@ void CLinearMotion::calcDamperingProfile( void )
 void CLinearMotion::makeLine( void )
 {
     /// Direction to move
-    const CAxis::EAxisDir dirX = mAxis[aAxisX].direction();
-    const CAxis::EAxisDir dirY = mAxis[aAxisX].direction();
+    const EAxisDir dirX = mAxis[aAxisX].direction();
+    const EAxisDir dirY = mAxis[aAxisX].direction();
     /// Get absolute values
     const uint32 dX = mAxis[aAxisX].deltaStepsABS();
     const uint32 dY = mAxis[aAxisY].deltaStepsABS();

@@ -15,7 +15,7 @@
 #include "IMotionBlock.h"
 #include "CLinearMotion.h"
 #include "CCircularMotion.h"
-#include "CSpindle.h"
+#include "CDriverAdapter.h"
 #include "CSettings.h"
 #include "DebugUtilities.h"
 
@@ -49,7 +49,6 @@ CComments                       CWord::mComment;
 IMotionBlock*                   CWord::mpMotion = &CWord::mLinearMotion;
 CLinearMotion                   CWord::mLinearMotion;
 CCircularMotion                 CWord::mCircularMotion;
-CSpindle                        CWord::mSpindle;
 
 uint16                          CWord::mLineNumber = 0;
 /// @brief Workarround for gcc warning: _DSO_HANDLE isn't defined
@@ -420,18 +419,7 @@ void CAddressM_Program::handler()
 /// @brief Handling: M15, M16
 void CAddressM_ZAxis::handler()
 {
-    CAxis::EAxisDir dir;
-
-    if ( 15 == code )
-    {
-        dir = CAxis::mdForward;
-    }
-    else
-    {
-        dir = CAxis::mdBackward;
-    }
-
-    mSpindle.doMove(dir);
+    CDriverAdapter::doMoveZ( static_cast<EAxisDir>(code -15), 0 );
 }
 
 /// @brief Handling all others
@@ -447,7 +435,7 @@ void CAddressM_AuxiliaryFunctions::handler()
 /// @brief Handling: X, Y, Z
 void CAxisMotionCommands::handler()
 {
-	mpMotion->set_axisPos( static_cast<IMotionBlock::EAxis>(address - 'X'), param );
+	mpMotion->set_axisPos( static_cast<EAxis>(address - 'X'), param );
 }
 
 ///=============================================================================
@@ -463,7 +451,7 @@ void CAxisRelated::handler()
     }
     else if ( ('I' <= address) && (address <= 'K') )
     {
-    	mpMotion->set_arcOffset( static_cast<IMotionBlock::EAxis>(address - 'I'), param );
+    	mpMotion->set_arcOffset( static_cast<EAxis>(address - 'I'), param );
     }
     else if ( 'R' == address )
     {

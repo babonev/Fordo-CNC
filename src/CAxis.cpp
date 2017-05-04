@@ -9,11 +9,11 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/CAxis.h"
-#include "../inc/CMathLib.h"
-#include "../inc/CSettings.h"
-#include "../inc/DebugUtilities.h"
+#include "Std_Types.h"
+#include "CAxis.h"
+#include "CMathLib.h"
+#include "CSettings.h"
+#include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief INITIALIZATION
@@ -52,9 +52,9 @@ uint32 CAxis::deltaStepsABS( void )
     return CMathLib::ABS(mDeltaSteps);
 }
 
-CAxis::EAxisDir CAxis::direction( void )
+EAxisDir CAxis::direction( void )
 {
-    return (mDeltaSteps > 0) ? (CAxis::mdForward) : (CAxis::mdBackward);
+    return (mDeltaSteps > 0) ? (mdForward) : (mdBackward);
 }
 
 ///=============================================================================
