@@ -74,6 +74,7 @@ void CAxis::finalize( void )
 {
     mDeltaPosition = 0;
     mDeltaSteps = 0;
+    mDirection = mdNoMove;
 }
 
 ///=============================================================================

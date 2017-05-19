@@ -68,7 +68,7 @@ void CLinearMotion::makeLine( void )
 {
     /// Direction to move
     const EAxisDir dirX = mAxis[aAxisX].direction();
-    const EAxisDir dirY = mAxis[aAxisX].direction();
+    const EAxisDir dirY = mAxis[aAxisY].direction();
     /// Get absolute values
     const uint32 dX = mAxis[aAxisX].deltaSteps();
     const uint32 dY = mAxis[aAxisY].deltaSteps();
