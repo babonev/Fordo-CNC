@@ -32,12 +32,12 @@ public:
     ///@brief
     typedef enum
     {
-        mtRapidPositioning,
-        mtLinearInterpolation,
-        mtCircularInterpolationCW,
-        mtCircularInterpolationCCW,
-        mtDwell,
-        mtCount
+        mmRapidPositioning,
+        mmLinearInterpolation,
+        mmCircularInterpolationCW,
+        mmCircularInterpolationCCW,
+        mmDwell,
+        mmCount
     } EMotionMode;
 
     ///@brief
@@ -53,10 +53,10 @@ public:
     /// @brief Virtual destructor
     virtual ~IMotionBlock();
     /// @brief
-    virtual void process( void ) = 0;
+    virtual void execute( void );
     /// @brief
     /// @param
-    virtual void set_motion( const EMotionMode motionMode) = 0;
+    virtual void set_motion( const EMotionMode motionMode);
     /// @brief
     /// @param
     /// @param
@@ -71,6 +71,9 @@ public:
     /// @param
     /// @param
     virtual void set_arcOffset( const EAxis axis, const float value );
+    /// @brief
+    /// @param
+    virtual void set_direction( const EAxisDir dir );
 
     /// @brief
     /// @param
@@ -98,8 +101,12 @@ protected:
     static uint32 mAxisDeltaSteps;
     ///@brief
     static uint32 mAxisHalfDeltaSteps;
+    ///@brief
+    static float mRadius;
     ///@brief Sub-type of motion
-    EMotionMode mMotionMode;
+    static bool mFastMode;
+    ///@brief
+    static EAxisDir mCircleDirection;
 
     /// @brief Convert to number of steps a distance in current unit
     /// @param New coordinate in current mode and unit
@@ -120,6 +127,7 @@ private:
     static uint32 mSpeed;
     ///@brief
     static uint32 mTool;
+
 };
 
 

@@ -12,6 +12,8 @@
 #ifndef INC_CCIRCULARMOTION_H_
 #define INC_CCIRCULARMOTION_H_
 
+#include "CAxis.h"
+
 class IMotionBlock;
 
 ///
@@ -23,11 +25,7 @@ public:
     ///@brief
     virtual ~CCircularMotion();
 	///@brief
-	virtual void process( void );
-    ///@brief
-	///@param
-    virtual void set_motion( const EMotionMode motionMode);
-
+	virtual void execute( void );
     ///@brief
     ///@param
     void set_radius( const float radius);
@@ -40,12 +38,10 @@ public:
     void set_arcOffset( const EAxis axis, const float steps );
 
 private:
-    ///@brief
-    float mRadius;
+
 
     ///@brief
     static uint32 calcDamperingProfile( void );
-
     ///@brief http://members.chello.at/~easyfilter/bresenham.html
     ///@param
     ///@param

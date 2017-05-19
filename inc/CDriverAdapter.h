@@ -29,7 +29,7 @@ class CDriverAdapter
 {
 public:
     ///@brief
-    static void process();
+    static void execute();
     ///@brief
     static void set_spindle( const ESwitchState state );
     ///@brief
@@ -48,6 +48,6 @@ private:
     static float mRetractPosition;
 };
 
-
+void drawStep( int dir, int axis, int state );
 
 #endif /* INC_CDRIVERADAPTER_H_ */

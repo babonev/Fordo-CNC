@@ -58,6 +58,13 @@ public: /// DATA MEMBERS
     ///@brief Max values of working parameters
     static const uint32 F_MAX = 120; /// [ mm/min ]
     static const uint32 S_MAX = 800; /// [ rpm ]
+    static const uint32 Z_F_MAX = 40; /// [ mm/min ]
+
+    ///@brief The lowest value that can be used in the selected metric system
+    static const float MIN_INCEMENT_METRIC;
+    static const float MIN_INCEMENT_IMPERIAL;
+    static const float MM_TO_STEPS;
+    static const float MILS_TO_STEPS;
 
     ///@brief
     static const uint8 FEEDRATE_ACCEL_PROFILE[5];

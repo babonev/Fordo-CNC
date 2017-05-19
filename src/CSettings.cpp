@@ -11,15 +11,11 @@
 
 #include "Std_Types.h"
 #include "CSettings.h"
+#include "CConfig.h"
 
 ///=============================================================================
 /// @brief INITIALIZATION
 ///=============================================================================
-const float CSettings::MIN_INCEMENT_METRIC = 0.001;
-const float CSettings::MIN_INCEMENT_IMPERIAL = 0.0001;
-const float CSettings::MM_TO_STEPS = 4.2;
-const float CSettings::MILS_TO_STEPS = (0.0254 * 4.2);
-
 CSettings::EMode CSettings::mMode = modeAbsolute;
 CSettings::EUnit CSettings::mUnit = unitMetric;
 CSettings::EDcimalFormat CSettings::mDecimFormat = dfDecimalPoint;

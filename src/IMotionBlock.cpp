@@ -16,9 +16,11 @@
 #include "DebugUtilities.h"
 
 ///=============================================================================
-/// @brief
+/// @brief INITIALIZATION
 ///=============================================================================
 CAxis IMotionBlock::mAxis[aAxisCount];
+float IMotionBlock::mRadius = 0;
+EAxisDir IMotionBlock::mCircleDirection = mdNoMove;
 uint32 IMotionBlock::mPauseCount = 0;
 uint32 IMotionBlock::mFeedrate = 0;
 uint32 IMotionBlock::mSpeed = 0;
@@ -26,6 +28,7 @@ uint32 IMotionBlock::mTool = 0;
 EAxis IMotionBlock::mLeadingAxis = aAxisCount;
 uint32 IMotionBlock::mAxisDeltaSteps = 0;
 uint32 IMotionBlock::mAxisHalfDeltaSteps = 0;
+bool IMotionBlock::mFastMode = false;
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -41,6 +44,35 @@ void IMotionBlock::init( void )
 IMotionBlock::~IMotionBlock()
 {
 
+}
+
+void IMotionBlock::execute( void )
+{
+    for( uint32 a = aAxisX; a < aAxisCount; a++)
+    {
+        mAxis[static_cast<EAxis>(a)].finalize();
+    }
+
+    mRadius = 0;
+}
+
+void IMotionBlock::set_motion( const EMotionMode motionMode )
+{
+    if ( motionMode < mmCount )
+    {
+        /// Set to false because it is set to true only in one case
+        mFastMode = false;
+
+        switch(motionMode)
+        {
+        case mmRapidPositioning:
+            mFastMode = true;
+            /// TODO: Spindle up
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void IMotionBlock::set_axisPos( const EAxis axis, const float value )
@@ -70,6 +102,11 @@ void IMotionBlock::set_arcOffset( const EAxis axis, const float value )
 void IMotionBlock::set_cycle( const ECycle type, const bool active)
 {
     /// TODO: Implement "cycle
+}
+
+void IMotionBlock::set_direction( const EAxisDir dir )
+{
+    mCircleDirection = dir;
 }
 
 void IMotionBlock::set_pause( const uint32 time)
@@ -109,33 +146,42 @@ void IMotionBlock::doStep( const EAxis axis, const EAxisDir dir )
 {
     uint32 actualFeedrate;
 
-    if ( mLeadingAxis == axis )
+    /// Spindle axis movement is individual
+    if ( aAxisZ != axis )
     {
-        /// Determine if acceleration or deceleration profile is needed
-        if ( mAxisDeltaSteps > mAxisHalfDeltaSteps )
+        /// If a RapidMotion is selected, move as fast as possible
+        if ( mFastMode )
         {
-            actualFeedrate = (mFeedrate * CConfig::get_FeedrateAccelFactor(mAxisDeltaSteps)) / 100;
+            /// Determine if acceleration or deceleration profile is needed
+            if ( mAxisDeltaSteps > mAxisHalfDeltaSteps )
+            {
+                actualFeedrate = (mFeedrate * CConfig::get_FeedrateAccelFactor(mAxisDeltaSteps)) / 100;
+            }
+            else
+            {
+                actualFeedrate = (mFeedrate * CConfig::get_FeedrateDecelFactor(mAxisDeltaSteps)) / 100;
+            }
         }
         else
         {
-            actualFeedrate = (mFeedrate * CConfig::get_FeedrateDecelFactor(mAxisDeltaSteps)) / 100;
-        }
-
-        if ( mAxisDeltaSteps > 0 )
-        {
-            mAxisDeltaSteps--;
+            actualFeedrate = CConfig::F_MAX;
         }
     }
     else
     {
-       actualFeedrate = mFeedrate >> 4;
+       actualFeedrate = CConfig::Z_F_MAX;
+    }
+
+    if ( mAxisDeltaSteps > 0 )
+    {
+        mAxisDeltaSteps--;
     }
 
     // Do the step with the calculated feed rate
     switch(axis)
     {
     case aAxisX:
-
+        CDriverAdapter::doMoveX(dir, actualFeedrate);
         break;
     case aAxisY:
         CDriverAdapter::doMoveY(dir, actualFeedrate);

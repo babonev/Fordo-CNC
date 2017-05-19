@@ -55,6 +55,8 @@ void CSequenceReader::process( const uint8* seqBlock, const uint32 length )
 				processWord(seqBlock, &byteIndex);
 				skipSpace(seqBlock, &byteIndex);
 			}
+			/// Execute the command
+			CWord::execute();
     	}
     	else
     	{

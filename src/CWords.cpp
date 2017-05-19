@@ -257,6 +257,12 @@ void CWord::processComment( const uint8* seqBlock, uint8* const pIndex )
     (*pIndex)++;
 }
 
+
+void CWord::execute( void )
+{
+    mpMotion->execute();
+}
+
 ///=============================================================================
 /// @brief N - Sequence Block Number
 ///=============================================================================
@@ -344,9 +350,11 @@ void CAddressG_MotionCommands::handler()
         mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
         break;
     case 2:  /// G02 - Circular interpolation clockwise
+        mpMotion->set_direction(mdForward);
+        break;
     case 3:  /// G03 - Circular interpolation counterclockwise
         mpMotion = &mCircularMotion;
-        mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
+        mpMotion->set_direction(mdBackward);
         break;
     case 32: /// G32 - Routed Circle Canned Cycle Clockwise
         mpMotion = &mCircularMotion;

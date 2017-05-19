@@ -24,14 +24,19 @@ float CDriverAdapter::mRetractPosition  = 0;
 /// @brief PUBLIC METHODS
 ///=============================================================================
 
-void CDriverAdapter::doMoveX( const EAxisDir dir, const uint32 feedrate )
+void CDriverAdapter::execute()
 {
 
 }
 
+void CDriverAdapter::doMoveX( const EAxisDir dir, const uint32 feedrate )
+{
+    drawStep((int)dir, 0, CDriverAdapter::mState);
+}
+
 void CDriverAdapter::doMoveY( const EAxisDir dir, const uint32 feedrate )
 {
-
+    drawStep((int)dir, 1, CDriverAdapter::mState);
 }
 
 void CDriverAdapter::doMoveZ( const EAxisDir dir, const uint32 feedrate )

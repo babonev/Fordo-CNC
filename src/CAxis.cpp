@@ -24,17 +24,31 @@
 /// @brief PUBLIC METHODS
 ///=============================================================================
 
-void CAxis::position( const float offset )
+void CAxis::position( const float newPos )
 {
     if ( CSettings::IS_MODE_ABSOLUTE() )
     {
-        mDeltaPosition = mPosition + offset;
-        mPosition = offset;
+        if ( newPos > mPosition )
+        {
+            mDeltaPosition = -(mPosition - newPos);
+            mDirection = mdForward;
+        }
+        else if ( newPos < mPosition )
+        {
+            mDeltaPosition = -(newPos - mPosition);
+            mDirection = mdBackward;
+        }
+        else
+        {
+            mDirection = mdNoMove;
+        }
+
+        mPosition = newPos;
     }
     else
     {
-        mDeltaPosition = offset;
-        mPosition = mPosition + offset;
+        mDeltaPosition = newPos;
+        mPosition = mPosition + newPos;
     }
 
     mDeltaSteps = distanceInSteps(mDeltaPosition);
@@ -42,36 +56,41 @@ void CAxis::position( const float offset )
 }
 
 
-sint32 CAxis::deltaSteps( void )
+uint32 CAxis::deltaSteps( void )
 {
     return mDeltaSteps;
 }
 
-uint32 CAxis::deltaStepsABS( void )
-{
-    return CMathLib::ABS(mDeltaSteps);
-}
-
 EAxisDir CAxis::direction( void )
 {
-    return (mDeltaSteps > 0) ? (mdForward) : (mdBackward);
+    return mDirection;
+}
+
+///=============================================================================
+/// @brief PROTECTED METHODS
+///=============================================================================
+
+void CAxis::finalize( void )
+{
+    mDeltaPosition = 0;
+    mDeltaSteps = 0;
 }
 
 ///=============================================================================
 /// @brief PRIVATE METHODS
 ///=============================================================================
 
-sint32 CAxis::distanceInSteps( const float newPos )
+uint32 CAxis::distanceInSteps( const float newPos )
 {
     sint32 stepsToMove = 0;
 
     /// Convert distance to steps
     float pos = (newPos * CSettings::STEPS_FACTOR()) + mError;
 
-    /// Store final position
-    mSteps += pos;
     /// Partial steps cannot be executed
     stepsToMove = static_cast<sint32>(pos);
+    /// Store final position
+    mSteps += stepsToMove;
     /// Calculate conversion error
     mError = (pos - stepsToMove);
 

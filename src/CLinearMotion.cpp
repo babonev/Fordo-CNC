@@ -25,32 +25,21 @@ CLinearMotion::~CLinearMotion()
 
 }
 
-void CLinearMotion::process( void )
+void CLinearMotion::execute( void )
 {
-    /// 1) Decide if Z will be working
-    if ( mtRapidPositioning == mMotionMode )
+    if ( (mAxis[aAxisX].deltaSteps() != 0) || (mAxis[aAxisY].deltaSteps() != 0) )
     {
-        /// TODO: 2) Retract Z
-    }
-    else
-    {
-        /// TODO: 2) Put into working state Z if retracted
-    }
+        /// 3) Calculate feed rate acceleration factor
+        calcDamperingProfile();
 
-    /// 3) Calculate feed rate acceleration factor
-    calcDamperingProfile();
+        /// 4) Move axis X and Y
+        makeLine();
 
-    /// 4) Move axis X and Y
-    makeLine();
+        /// 5) Finalize move
+        IMotionBlock::execute();
+    }
 }
 
-void CLinearMotion::set_motion( const EMotionMode motionMode )
-{
-    if ( (mtRapidPositioning == motionMode) || (mtLinearInterpolation == motionMode) )
-    {
-        mMotionMode = motionMode;
-    }
-}
 
 ///=============================================================================
 /// @brief PRIVATE METHODS
@@ -58,8 +47,8 @@ void CLinearMotion::set_motion( const EMotionMode motionMode )
 
 void CLinearMotion::calcDamperingProfile( void )
 {
-    const uint32 dX = mAxis[aAxisX].deltaStepsABS();
-    const uint32 dY = mAxis[aAxisY].deltaStepsABS();
+    const uint32 dX = mAxis[aAxisX].deltaSteps();
+    const uint32 dY = mAxis[aAxisY].deltaSteps();
 
     if ( dX > dY )
     {
@@ -81,8 +70,8 @@ void CLinearMotion::makeLine( void )
     const EAxisDir dirX = mAxis[aAxisX].direction();
     const EAxisDir dirY = mAxis[aAxisX].direction();
     /// Get absolute values
-    const uint32 dX = mAxis[aAxisX].deltaStepsABS();
-    const uint32 dY = mAxis[aAxisY].deltaStepsABS();
+    const uint32 dX = mAxis[aAxisX].deltaSteps();
+    const uint32 dY = mAxis[aAxisY].deltaSteps();
     /// Variables used in next calculations
     uint32 over = 0;
     uint32 i;
@@ -104,13 +93,14 @@ void CLinearMotion::makeLine( void )
     {
         for( i = 0; i < dY; ++i )
         {
-        	doStep(aAxisX, dirY);
+        	doStep(aAxisY, dirY);
             over += dX;
             if ( over >= dY )
             {
                 over -= dY;
-                doStep(aAxisY, dirX);
+                doStep(aAxisX, dirX);
             }
         }
     }
 }
+

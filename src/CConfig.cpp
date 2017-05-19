@@ -15,6 +15,17 @@
 ///=============================================================================
 /// @brief INITIALIZATION
 ///=============================================================================
+#ifdef _SIMULATION
+const float CConfig::MM_TO_STEPS = 0.5;
+const float CConfig::MILS_TO_STEPS = 0.5;
+#else
+const float CConfig::MM_TO_STEPS = 4.2;
+const float CConfig::MILS_TO_STEPS = (0.0254 * 4.2);
+#endif
+
+const float CConfig::MIN_INCEMENT_METRIC = 0.001;
+const float CConfig::MIN_INCEMENT_IMPERIAL = 0.0001;
+
 const char* const CConfig::METRIC_FORMAT = "000.000";
 const char* const CConfig::INCH_FORMAT = "00.0000";
 

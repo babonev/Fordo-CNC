@@ -23,19 +23,16 @@ public:
     ///@brief
     virtual ~CLinearMotion();
 	/// @brief
-	virtual void process( void );
-    ///@brief
-	///@param
-    virtual void set_motion( const EMotionMode motionMode);
+	virtual void execute( void );
 
 private:
 
     ///@brief
     static void calcDamperingProfile( void );
     /// @brief Uses Bresenham's line algorithm to move both motors
-    /// @param
-    /// @param
     static void makeLine( void );
+    /// @brief
+    static void finalize( void );
 };
 
 #endif /* INC_CMOTIONLINEAR_H_ */

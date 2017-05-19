@@ -38,6 +38,8 @@ public:
     static void assign( const uint8 address, const uint8* seqBlock, uint8* const pIndex );
     /// Processing of the G-code
     virtual void handler();
+    /// Executing of the command
+    static void execute( void );
 
 protected:
     static CWord mWord;

@@ -14,6 +14,7 @@
 #include "CCircularMotion.h"
 #include "DebugUtilities.h"
 
+
 ///=============================================================================
 /// @brief PUBLIC METHODS
 ///=============================================================================
@@ -23,17 +24,13 @@ CCircularMotion::~CCircularMotion()
 
 }
 
-void CCircularMotion::process( void )
+void CCircularMotion::execute( void )
 {
-
-    makeArc(0,0, mMotionMode,0);
-}
-
-void CCircularMotion::set_motion( const EMotionMode motionMode )
-{
-    if ( (mtCircularInterpolationCW == motionMode) || (mtCircularInterpolationCW == motionMode) )
+    if ( mRadius != 0 )
     {
-        mMotionMode = motionMode;
+        makeArc(0,0,mCircleDirection,0);
+
+        IMotionBlock::execute();
     }
 }
 
@@ -53,6 +50,7 @@ void CCircularMotion::set_arcOffset( const EAxis axis, const float steps )
 {
 
 }
+
 
 ///=============================================================================
 /// @brief PRIVATE METHODS

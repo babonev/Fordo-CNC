@@ -33,15 +33,14 @@ public:
 
     ///@brief
     ///@return
-    sint32 deltaSteps();
-
-    ///@brief
-    ///@return
-    uint32 deltaStepsABS();
+    uint32 deltaSteps();
 
     ///@brief
     ///@return
     EAxisDir direction();
+
+    ///@brief
+    void finalize();
 
 private:
     ///@brief New offset of axis in measurement units
@@ -51,14 +50,16 @@ private:
     ///@brief Current position of axis in step
     uint32 mDeltaSteps;      /// [steps]
     ///@brief Current position of axis in step
-    uint32 mSteps;           /// [steps]
+    sint32 mSteps;           /// [steps]
+    ///@brief
+    EAxisDir mDirection;
     ///@brief Cumulative error from calculations
     float mError;            /// [steps]
 
     ///@brief
     ///@param
     ///@return
-    sint32 distanceInSteps( const float newPos );
+    uint32 distanceInSteps( const float newPos );
 };
 
 #endif /* INC_CAXIS_H_ */

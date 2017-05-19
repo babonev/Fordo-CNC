@@ -96,12 +96,6 @@ public:
     static inline float STEPS_FACTOR();
 
 private:
-    ///@brief The lowest value that can be used in the selected metric system
-    static const float MIN_INCEMENT_METRIC;
-    static const float MIN_INCEMENT_IMPERIAL;
-    static const float MM_TO_STEPS;
-    static const float MILS_TO_STEPS;
-
     ///@brief Configuration storing members
     static EMode mMode;
     static EUnit mUnit;
@@ -114,7 +108,7 @@ private:
 
 inline float CSettings::MIN_INCREMENT()
 {
-    return (unitMetric == mUnit) ? MIN_INCEMENT_METRIC : MIN_INCEMENT_IMPERIAL;
+    return (unitMetric == mUnit) ? CConfig::MIN_INCEMENT_METRIC : CConfig::MIN_INCEMENT_IMPERIAL;
 }
 
 inline uint32 CSettings::LZ_COUNT()
@@ -144,7 +138,9 @@ inline bool CSettings::IS_UNIT_METRIC()
 
 inline float CSettings::STEPS_FACTOR()
 {
-    return ((unitMetric == mUnit) ? (MM_TO_STEPS*CConfig::STEP_MODE) : (MILS_TO_STEPS*CConfig::STEP_MODE));
+    float res = (unitMetric == mUnit) ? CConfig::MM_TO_STEPS : CConfig::MILS_TO_STEPS;
+
+    return (res = res * (1 << CConfig::STEP_MODE));
 }
 
 #endif  /// INC_CSETTINGS_H_
