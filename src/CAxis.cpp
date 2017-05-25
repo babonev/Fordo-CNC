@@ -11,14 +11,25 @@
 
 #include "Std_Types.h"
 #include "CAxis.h"
+#include "CDriverAdapter.h"
 #include "CMathLib.h"
+#include "CConfig.h"
 #include "CSettings.h"
 #include "DebugUtilities.h"
 
 ///=============================================================================
 /// @brief INITIALIZATION
 ///=============================================================================
-
+CAxis::CAxis( const EAxis id ) : mID(id)
+{
+    mDeltaSteps = 0;
+    mPosition = 0;
+    mError = 0;
+    mSteps = 0;
+    mDeltaPosition = 0;
+    mHalfDeltaSteps = 0;
+    mDirection = mdNoMove;
+}
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -52,6 +63,7 @@ void CAxis::position( const float newPos )
     }
 
     mDeltaSteps = distanceInSteps(mDeltaPosition);
+    mHalfDeltaSteps = mDeltaSteps >> 1;
     /// TODO: Check if less than max possible
 }
 
@@ -66,6 +78,28 @@ EAxisDir CAxis::direction( void )
     return mDirection;
 }
 
+void CAxis::doStep( const EAxisDir dir )
+{
+    uint32 actualFeedrate;
+
+    /// Determine if acceleration or deceleration profile is needed
+    if ( mDeltaSteps > mHalfDeltaSteps )
+    {
+        actualFeedrate = CConfig::get_FeedrateAccelFactor(mDeltaSteps) / 100;
+    }
+    else
+    {
+        actualFeedrate = CConfig::get_FeedrateDecelFactor(mDeltaSteps) / 100;
+    }
+
+    if ( mDeltaSteps > 0 )
+    {
+        mDeltaSteps--;
+    }
+
+    CDriverAdapter::doMove(mID, dir, actualFeedrate);
+}
+
 ///=============================================================================
 /// @brief PROTECTED METHODS
 ///=============================================================================
@@ -74,6 +108,7 @@ void CAxis::finalize( void )
 {
     mDeltaPosition = 0;
     mDeltaSteps = 0;
+    mHalfDeltaSteps = 0;
     mDirection = mdNoMove;
 }
 

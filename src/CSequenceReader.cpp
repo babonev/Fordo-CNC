@@ -9,13 +9,12 @@
 /// @copyright
 ///=============================================================================
 
-#include "../inc/Std_Types.h"
-#include "../inc/CSequenceReader.h"
-#include "../inc/CWords.h"
-#include "../inc/CConfig.h"
-#include "../inc/CSettings.h"
-#include "../inc/IMotionBlock.h"
-#include "../inc/DebugUtilities.h"
+#include "Std_Types.h"
+#include "CSequenceReader.h"
+#include "CWords.h"
+#include "CConfig.h"
+#include "CSettings.h"
+#include "DebugUtilities.h"
 
 ///============================================================================
 /// @brief INITIALIZATION
@@ -32,7 +31,7 @@ void CSequenceReader::init( void )
 	sequenceCount = 0;
 
 	CExellonHeader::init();
-    IMotionBlock::init();
+	CWord::init();
 	CSettings::set_default();
 }
 

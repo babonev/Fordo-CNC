@@ -21,9 +21,7 @@ class CSpeed;
 class CFeedrate;
 class CTool;
 class CComments;
-class IMotionBlock;
-class CLinearMotion;
-class CCircularMotion;
+class CMotion;
 
 ///=============================================================================
 /// @brief Factory producing objects of G code group types. Also stores the
@@ -32,8 +30,10 @@ class CCircularMotion;
 class CWord
 {
 public:
-    /// Virtual destructor
+    ///@brief Virtual destructor
     virtual ~CWord();
+    ///@brief
+    static void init();
     /// Returns a pointer to the required object type depending on the parameters
     static void assign( const uint8 address, const uint8* seqBlock, uint8* const pIndex );
     /// Processing of the G-code
@@ -43,9 +43,7 @@ public:
 
 protected:
     static CWord mWord;
-    static IMotionBlock* mpMotion;
-    static CLinearMotion mLinearMotion;
-    static CCircularMotion mCircularMotion;
+    static CMotion mMotion;
     /// Store the line number
     static uint16 mLineNumber;
 

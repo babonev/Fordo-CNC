@@ -14,33 +14,41 @@
 
 #include "CAxis.h"
 
-class IMotionBlock;
-
 ///
 ///@brief
 //
-class CCircularMotion : public IMotionBlock
+class CCircularMotion
 {
 public:
     ///@brief
     virtual ~CCircularMotion();
+    ///@brief
+    virtual void init();
 	///@brief
-	virtual void execute( void );
+	virtual void execute();
+    /// @brief
+    /// @param
+    virtual void set_radius( const float radius);
+    /// @brief
+    /// @param
+    virtual void set_arcRadius( const float radius);
+    /// @brief
+    /// @param
+    /// @param
+    virtual void set_arcOffset( const EAxis axis, const float value );
+    /// @brief
+    /// @param
+    virtual void set_direction( const EAxisDir dir );
+
+protected:
     ///@brief
-    ///@param
-    void set_radius( const float radius);
+    static float mRadius;
     ///@brief
-    ///@param
-    void set_arcRadius( const float radius );
-    ///@brief
-    ///@param
-    ///@param
-    void set_arcOffset( const EAxis axis, const float steps );
+    static EAxisDir mCircleDirection;
 
 private:
-
-
     ///@brief
+    ///@return
     static uint32 calcDamperingProfile( void );
     ///@brief http://members.chello.at/~easyfilter/bresenham.html
     ///@param

@@ -10,10 +10,14 @@
 ///=============================================================================
 
 #include "Std_Types.h"
-#include "IMotionBlock.h"
 #include "CCircularMotion.h"
 #include "DebugUtilities.h"
 
+///=============================================================================
+/// @brief INITIALIZATION
+///=============================================================================
+float CCircularMotion::mRadius = 0;
+EAxisDir CCircularMotion::mCircleDirection = mdNoMove;
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -24,13 +28,16 @@ CCircularMotion::~CCircularMotion()
 
 }
 
-void CCircularMotion::execute( void )
+void CCircularMotion::init()
+{
+    mRadius = 0;
+}
+
+void CCircularMotion::execute()
 {
     if ( mRadius != 0 )
     {
         makeArc(0,0,mCircleDirection,0);
-
-        IMotionBlock::execute();
     }
 }
 
@@ -49,6 +56,11 @@ void CCircularMotion::set_arcRadius( const float radius )
 void CCircularMotion::set_arcOffset( const EAxis axis, const float steps )
 {
 
+}
+
+void CCircularMotion::set_direction( const EAxisDir dir )
+{
+    mCircleDirection = dir;
 }
 
 

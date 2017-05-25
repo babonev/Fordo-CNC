@@ -20,12 +20,24 @@ typedef enum
     mdBackward = -1
 } EAxisDir;
 
+///@brief Names and number of axis
+typedef enum
+{
+    aAxisX,
+    aAxisY,
+    aAxisZ,
+    aAxisCount
+} EAxis;
+
 ///
 ///@brief
 //
 class CAxis
 {
 public:
+    ///@brief
+    ///@param
+    CAxis( const EAxis id );
 
     ///@brief
     ///@param
@@ -40,15 +52,22 @@ public:
     EAxisDir direction();
 
     ///@brief
+    ///@param
+    void doStep( const EAxisDir dir );
+
+    ///@brief
     void finalize();
 
 private:
+    const EAxis mID;
     ///@brief New offset of axis in measurement units
     float mDeltaPosition;    /// [units: mil/mm]
     ///@brief Current position of axis in measurement units
     float mPosition;         /// [units: mil/mm]
     ///@brief Current position of axis in step
     uint32 mDeltaSteps;      /// [steps]
+    ///@brief
+    uint32 mHalfDeltaSteps; /// [steps]
     ///@brief Current position of axis in step
     sint32 mSteps;           /// [steps]
     ///@brief

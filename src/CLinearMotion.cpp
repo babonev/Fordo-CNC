@@ -10,11 +10,17 @@
 ///=============================================================================
 
 #include "Std_Types.h"
-#include "IMotionBlock.h"
 #include "CLinearMotion.h"
 #include "CAxis.h"
+#include "CDriverAdapter.h"
 #include "CMathLib.h"
 #include "DebugUtilities.h"
+
+///=============================================================================
+/// @brief INITIALIZATION
+///=============================================================================
+CAxis CLinearMotion::mAxis[aAxisCount] = { CAxis(aAxisX), CAxis(aAxisY), CAxis(aAxisZ) };
+EAxis CLinearMotion::mLeadingAxis = aAxisCount;
 
 ///=============================================================================
 /// @brief PUBLIC METHODS
@@ -25,21 +31,28 @@ CLinearMotion::~CLinearMotion()
 
 }
 
-void CLinearMotion::execute( void )
+void CLinearMotion::init()
+{
+    mLeadingAxis = aAxisCount;
+}
+
+void CLinearMotion::execute()
 {
     if ( (mAxis[aAxisX].deltaSteps() != 0) || (mAxis[aAxisY].deltaSteps() != 0) )
     {
-        /// 3) Calculate feed rate acceleration factor
+        ///< Calculate feed rate acceleration factor
         calcDamperingProfile();
 
-        /// 4) Move axis X and Y
+        ///< Move axis X and Y
         makeLine();
-
-        /// 5) Finalize move
-        IMotionBlock::execute();
     }
 }
 
+void CLinearMotion::set_axisPos( const EAxis axis, const float value )
+{
+    mAxis[axis].position(value);
+    CDebug::traceEvent(EVENT_AxisSet, value);
+}
 
 ///=============================================================================
 /// @brief PRIVATE METHODS
@@ -53,15 +66,11 @@ void CLinearMotion::calcDamperingProfile( void )
     if ( dX > dY )
     {
         mLeadingAxis = aAxisX;
-        mAxisDeltaSteps = dX;
     }
     else
     {
         mLeadingAxis = aAxisY;
-        mAxisDeltaSteps = dY;
     }
-
-    mAxisHalfDeltaSteps = mAxisDeltaSteps >> 1;
 }
 
 void CLinearMotion::makeLine( void )
@@ -80,12 +89,12 @@ void CLinearMotion::makeLine( void )
     {
         for( i = 0; i < dX; ++i )
         {
-        	doStep(aAxisX, dirX);
+            mAxis[aAxisX].doStep(dirX);
             over += dY;
             if ( over >= dX )
             {
                 over -= dX;
-                doStep(aAxisY, dirY);
+                mAxis[aAxisY].doStep(dirY);
             }
         }
     }
@@ -93,12 +102,12 @@ void CLinearMotion::makeLine( void )
     {
         for( i = 0; i < dY; ++i )
         {
-        	doStep(aAxisY, dirY);
+            mAxis[aAxisY].doStep(dirY);
             over += dX;
             if ( over >= dY )
             {
                 over -= dY;
-                doStep(aAxisX, dirX);
+                mAxis[aAxisX].doStep(dirX);
             }
         }
     }

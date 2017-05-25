@@ -16,8 +16,7 @@
 ///=============================================================================
 /// @brief INITIALIZATION
 ///=============================================================================
-ESwitchState CDriverAdapter::mState = eSwitchStateCount;
-EAxisDir CDriverAdapter::mMoveDir = mdNoMove;
+ESwitchState CDriverAdapter::mState = eSwitchOFF;
 float CDriverAdapter::mRetractPosition  = 0;
 
 ///=============================================================================
@@ -29,24 +28,33 @@ void CDriverAdapter::execute()
 
 }
 
-void CDriverAdapter::doMoveX( const EAxisDir dir, const uint32 feedrate )
+void CDriverAdapter::doMove( const EAxis id, const EAxisDir dir, const uint32 feedrate )
 {
-    drawStep((int)dir, 0, CDriverAdapter::mState);
+    if ( id == aAxisZ )
+    {
+        if ( dir == mdForward )
+        {
+            setSpindle(eSwitchON);
+        }
+        else
+        {
+            setSpindle(eSwitchOFF);
+        }
+    }
+    else
+    {
+        drawStep((int)dir, id, CDriverAdapter::mState);
+    }
 }
 
-void CDriverAdapter::doMoveY( const EAxisDir dir, const uint32 feedrate )
+const ESwitchState CDriverAdapter::getSpindle()
 {
-    drawStep((int)dir, 1, CDriverAdapter::mState);
+    return CDriverAdapter::mState;
 }
 
-void CDriverAdapter::doMoveZ( const EAxisDir dir, const uint32 feedrate )
+void CDriverAdapter::setSpindle( const ESwitchState state )
 {
-    CDriverAdapter::mMoveDir = dir;
-}
-
-void CDriverAdapter::set_spindle( const ESwitchState state )
-{
-    if ( state < eSwitchStateCount)
+    if ( CDriverAdapter::mState != state )
     {
         CDriverAdapter::mState = state;
     }

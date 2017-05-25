@@ -17,9 +17,8 @@
 ///@brief
 typedef enum
 {
-    eSwitchOFF,
-    eSwitchON,
-    eSwitchStateCount
+    eSwitchOFF = false,
+    eSwitchON = true
 } ESwitchState;
 
 ///
@@ -31,19 +30,19 @@ public:
     ///@brief
     static void execute();
     ///@brief
-    static void set_spindle( const ESwitchState state );
+    static const ESwitchState getSpindle();
     ///@brief
-    static void doMoveX( const EAxisDir dir, const uint32 feedrate );
+    ///@param
+    static void setSpindle( const ESwitchState state );
     ///@brief
-    static void doMoveY( const EAxisDir dir, const uint32 feedrate );
-    ///@brief
-    static void doMoveZ( const EAxisDir dir, const uint32 feedrate );
+    ///@param
+    ///@param
+    ///@param
+    static void doMove( const EAxis id, const EAxisDir dir, const uint32 feedrate );
 
 private:
     ///@brief
     static ESwitchState mState;
-    ///@brief
-    static EAxisDir mMoveDir;
     ///@brief
     static float mRetractPosition;
 };

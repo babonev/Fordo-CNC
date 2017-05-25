@@ -12,9 +12,9 @@
 
 #include "Std_Types.h"
 #include "CWords.h"
-#include "IMotionBlock.h"
 #include "CLinearMotion.h"
 #include "CCircularMotion.h"
+#include "CMotion.h"
 #include "CDriverAdapter.h"
 #include "CSettings.h"
 #include "DebugUtilities.h"
@@ -46,10 +46,7 @@ CFeedrate                       CWord::mFeedrate;
 CTool                           CWord::mTool;
 CComments                       CWord::mComment;
 
-IMotionBlock*                   CWord::mpMotion = &CWord::mLinearMotion;
-CLinearMotion                   CWord::mLinearMotion;
-CCircularMotion                 CWord::mCircularMotion;
-
+CMotion                         CWord::mMotion;
 uint16                          CWord::mLineNumber = 0;
 /// @brief Workarround for gcc warning: _DSO_HANDLE isn't defined
 #ifdef STM32F103C8
@@ -64,6 +61,11 @@ uint16                          CWord::mLineNumber = 0;
 CWord::~CWord()
 {
 
+}
+
+void CWord::init()
+{
+    mMotion.init();
 }
 
 /// @brief
@@ -260,7 +262,7 @@ void CWord::processComment( const uint8* seqBlock, uint8* const pIndex )
 
 void CWord::execute( void )
 {
-    mpMotion->execute();
+    mMotion.execute();
 }
 
 ///=============================================================================
@@ -329,7 +331,7 @@ void CAddressG_UnmodalCodes::handler()
     switch(code)
     {
     case 4:  /// G04 - Dwell
-        mpMotion->set_pause(100);
+        mMotion.set_pause(100);
         break;
     case 9:  /// G09 -
     case 10: /// G10 - Coordinate System Data Tool and Work Offset Tables
@@ -346,26 +348,24 @@ void CAddressG_MotionCommands::handler()
     {
     case 0:  /// G00 - Rapid positioning
     case 1:  /// G01 - Linear interpolation
-        mpMotion = &mLinearMotion;
-        mpMotion->set_motion(static_cast<IMotionBlock::EMotionMode>(code));
+        mMotion.set_motion(static_cast<CMotion::EMotionMode>(code));
         break;
     case 2:  /// G02 - Circular interpolation clockwise
-        mpMotion->set_direction(mdForward);
+        mMotion.set_direction(mdForward);
         break;
     case 3:  /// G03 - Circular interpolation counterclockwise
-        mpMotion = &mCircularMotion;
-        mpMotion->set_direction(mdBackward);
+        mMotion.set_direction(mdBackward);
         break;
     case 32: /// G32 - Routed Circle Canned Cycle Clockwise
-        mpMotion = &mCircularMotion;
         break;
     case 33: /// G33 - Routed Circle Canned Cycle Counterclockwise
-        mpMotion = &mCircularMotion;
         break;
     default:
     	CDebug::reportErrorLine(ERROR_Invalid_GCode);
         break;
     }
+
+    CDriverAdapter::setSpindle(eSwitchON);
 }
 
 /// @brief Handling: G17, G18, G19
@@ -427,7 +427,14 @@ void CAddressM_Program::handler()
 /// @brief Handling: M15, M16
 void CAddressM_ZAxis::handler()
 {
-    CDriverAdapter::doMoveZ( static_cast<EAxisDir>(code -15), 0 );
+    if ( 15 == code )
+    {
+        CDriverAdapter::doMove( aAxisZ, mdForward, 0 );
+    }
+    else if ( 16 == code )
+    {
+        CDriverAdapter::doMove( aAxisZ, mdBackward, 0 );
+    }
 }
 
 /// @brief Handling all others
@@ -443,7 +450,7 @@ void CAddressM_AuxiliaryFunctions::handler()
 /// @brief Handling: X, Y, Z
 void CAxisMotionCommands::handler()
 {
-	mpMotion->set_axisPos( static_cast<EAxis>(address - 'X'), param );
+	mMotion.set_axisPos( static_cast<EAxis>(address - 'X'), param );
 }
 
 ///=============================================================================
@@ -455,15 +462,15 @@ void CAxisRelated::handler()
 {
     if ( 'A' == address )
     {
-        mpMotion->set_arcRadius(param);
+        mMotion.set_arcRadius(param);
     }
     else if ( ('I' <= address) && (address <= 'K') )
     {
-    	mpMotion->set_arcOffset( static_cast<EAxis>(address - 'I'), param );
+    	mMotion.set_arcOffset( static_cast<EAxis>(address - 'I'), param );
     }
     else if ( 'R' == address )
     {
-    	mpMotion->set_radius(param);
+    	mMotion.set_radius(param);
     }
     else
     {
@@ -478,7 +485,7 @@ void CAxisRelated::handler()
 /// @brief Handling: S
 void CPause::handler()
 {
-	mpMotion->set_pause( param );
+	mMotion.set_pause( param );
 }
 
 ///=============================================================================
@@ -488,19 +495,19 @@ void CPause::handler()
 /// @brief Handling: S
 void CSpeed::handler()
 {
-	mpMotion->set_speed( param );
+	mMotion.set_speed( param );
 }
 
 /// @brief Handling: F
 void CFeedrate::handler()
 {
-	mpMotion->set_speed( param );
+	mMotion.set_feedrate( param );
 }
 
 /// @brief Handling: T
 void CTool::handler()
 {
-	mpMotion->set_tool( param );
+	mMotion.set_tool( param );
 }
 
 ///=============================================================================
